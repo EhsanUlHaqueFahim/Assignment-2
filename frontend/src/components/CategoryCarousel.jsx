@@ -29,31 +29,29 @@ const CategoryCarousel = () => {
     }
 
     return (
-        <div className="py-16 bg-gradient-to-r from-gray-50 to-white">
+        <div className="py-16 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-900 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-800 mb-4">
+                    <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
                         Explore Popular <span className="text-[#6A38C2]">Job Categories</span>
                     </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                         Find opportunities in your field of expertise. Browse through our curated categories 
                         to discover the perfect role for your career growth.
                     </p>
                 </div>
-                
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
                     {category.slice(0, 8).map((cat, index) => (
                         <Button 
                             key={index}
                             onClick={() => searchJobHandler(cat)} 
                             variant="outline" 
-                            className="h-16 rounded-xl border-2 hover:border-[#6A38C2] hover:bg-[#6A38C2] hover:text-white transition-all duration-300 font-medium text-sm"
+                            className="h-16 rounded-xl border-2 hover:border-[#6A38C2] hover:bg-[#6A38C2] hover:text-white transition-all duration-300 font-medium text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
                         >
                             {cat}
                         </Button>
                     ))}
                 </div>
-                
                 <div className="text-center">
                     <Button 
                         onClick={() => navigate("/browse")}

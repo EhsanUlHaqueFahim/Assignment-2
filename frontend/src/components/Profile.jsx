@@ -1,77 +1,93 @@
-import React, { useState } from 'react'
-import Navbar from './shared/Navbar'
-import { Avatar, AvatarImage } from './ui/avatar'
-import { Button } from './ui/button'
-import { Contact, Mail, Pen } from 'lucide-react'
-import { Badge } from './ui/badge'
-import { Label } from './ui/label'
-import AppliedJobTable from './AppliedJobTable'
-import UpdateProfileDialog from './UpdateProfileDialog'
-import { useSelector } from 'react-redux'
-import useGetAppliedJobs from '@/hooks/useGetAppliedJobs'
-
-
-const isResume = true;
+import React, { useState } from 'react';
+import Navbar from './shared/Navbar';
+import { useSelector, useDispatch } from 'react-redux';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import axios from 'axios';
+import { USER_API_END_POINT } from '@/utils/constant';
+import { toast } from 'sonner';
+import { setUser } from '@/redux/authSlice';
 
 const Profile = () => {
-    useGetAppliedJobs();
-    const [open, setOpen] = useState(false);
-    const {user} = useSelector(store=>store.auth);
+  const { user } = useSelector(store => store.auth);
+  const dispatch = useDispatch();
+  const [input, setInput] = useState({
+    fullname: user?.fullname || '',
+    email: user?.email || '',
+    phoneNumber: user?.phoneNumber || '',
+    password: '',
+    file: null
+  });
+  const [loading, setLoading] = useState(false);
 
-    return (
-        <div>
-            <Navbar />
-            <div className='max-w-4xl mx-auto bg-white border border-gray-200 rounded-2xl my-5 p-8'>
-                <div className='flex justify-between'>
-                    <div className='flex items-center gap-4'>
-                        <Avatar className="h-24 w-24">
-                            <AvatarImage src={user?.profile?.profilePhoto} alt="profile" />
-                            {!user?.profile?.profilePhoto && (
-                                <div className="w-full h-full bg-[#6A38C2] flex items-center justify-center text-white font-semibold text-2xl">
-                                    {user?.fullname?.charAt(0)?.toUpperCase() || 'U'}
-                                </div>
-                            )}
-                        </Avatar>
-                        <div>
-                            <h1 className='font-medium text-xl'>{user?.fullname}</h1>
-                            <p>{user?.profile?.bio}</p>
-                        </div>
-                    </div>
-                    <Button onClick={() => setOpen(true)} className="text-right" variant="outline"><Pen /></Button>
-                </div>
-                <div className='my-5'>
-                    <div className='flex items-center gap-3 my-2'>
-                        <Mail />
-                        <span>{user?.email}</span>
-                    </div>
-                    <div className='flex items-center gap-3 my-2'>
-                        <Contact />
-                        <span>{user?.phoneNumber}</span>
-                    </div>
-                </div>
-                <div className='my-5'>
-                    <h1>Skills</h1>
-                    <div className='flex items-center gap-1'>
-                        {
-                            user?.profile?.skills.length !== 0 ? user?.profile?.skills.map((item, index) => <Badge key={index}>{item}</Badge>) : <span>NA</span>
-                        }
-                    </div>
-                </div>
-                <div className='grid w-full max-w-sm items-center gap-1.5'>
-                    <Label className="text-md font-bold">Resume</Label>
-                    {
-                        isResume ? <a target='blank' href={user?.profile?.resume} className='text-blue-500 w-full hover:underline cursor-pointer'>{user?.profile?.resumeOriginalName}</a> : <span>NA</span>
-                    }
-                </div>
-            </div>
-            <div className='max-w-4xl mx-auto bg-white rounded-2xl'>
-                <h1 className='font-bold text-lg my-5'>Applied Jobs</h1>
-                {/* Applied Job Table   */}
-                <AppliedJobTable />
-            </div>
-            <UpdateProfileDialog open={open} setOpen={setOpen}/>
-        </div>
-    )
-}
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'file') {
+      setInput({ ...input, file: files[0] });
+    } else {
+      setInput({ ...input, [name]: value });
+    }
+  };
 
-export default Profile
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('fullname', input.fullname);
+      formData.append('email', input.email);
+      formData.append('phoneNumber', input.phoneNumber);
+      if (input.password) formData.append('password', input.password);
+      if (input.file) formData.append('file', input.file);
+      const res = await axios.put(`${USER_API_END_POINT}/update`, formData, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success) {
+        toast.success(res.data.message || 'Profile updated!');
+        dispatch(setUser(res.data.user));
+      } else {
+        toast.error(res.data.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
+      <Navbar />
+      <div className="max-w-xl mx-auto my-8 p-6 bg-white dark:bg-gray-800 rounded shadow">
+        <h2 className="text-2xl font-bold mb-4">Your Profile</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="fullname">Full Name</Label>
+            <Input id="fullname" name="fullname" value={input.fullname} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" name="email" value={input.email} onChange={handleChange} type="email" />
+          </div>
+          <div>
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Input id="phoneNumber" name="phoneNumber" value={input.phoneNumber} onChange={handleChange} />
+          </div>
+          <div>
+            <Label htmlFor="password">Password (leave blank to keep unchanged)</Label>
+            <Input id="password" name="password" value={input.password} onChange={handleChange} type="password" />
+          </div>
+          <div>
+            <Label htmlFor="file">Profile Photo</Label>
+            <Input id="file" name="file" type="file" accept="image/*" onChange={handleChange} />
+          </div>
+          <Button type="submit" disabled={loading} className="bg-purple-600 text-white w-full">Update Profile</Button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Profile;
