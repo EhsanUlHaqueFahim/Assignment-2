@@ -1,68 +1,77 @@
-import { createBrowserRouter, RouterProvider, Link } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Navbar from './components/shared/Navbar'
 import Login from './components/auth/Login'
 import Signup from './components/auth/Signup'
 import Home from './components/Home'
 import Jobs from './components/Jobs'
-import Companies from './components/Companies'
+import Browse from './components/Browse'
 import Profile from './components/Profile'
+import JobDescription from './components/JobDescription'
+import Companies from './components/admin/Companies'
+import CompanyCreate from './components/admin/CompanyCreate'
+import CompanySetup from './components/admin/CompanySetup'
+import AdminJobs from "./components/admin/AdminJobs";
+import PostJob from './components/admin/PostJob'
+import Applicants from './components/admin/Applicants'
+import ProtectedRoute from './components/admin/ProtectedRoute'
 import useAuth from './hooks/useAuth'
-import React from 'react';
 
-function NotFound() {
-  return (
-    <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-      <h1>404 - Page Not Found</h1>
-      <p>The page you are looking for does not exist.</p>
-      <Link to="/" style={{ color: '#6A38C2', textDecoration: 'underline' }}>Go to Home</Link>
-    </div>
-  );
-}
-
-function ErrorFallback({ error }) {
-  return (
-    <div style={{ textAlign: 'center', marginTop: '4rem' }}>
-      <h1>Something went wrong!</h1>
-      <pre style={{ color: 'red' }}>{error?.message || 'Unknown error'}</pre>
-      <Link to="/" style={{ color: '#6A38C2', textDecoration: 'underline' }}>Go to Home</Link>
-    </div>
-  );
-}
 
 const appRouter = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
-    errorElement: <ErrorFallback />,
+    element: <Home />
   },
   {
     path: '/login',
-    element: <Login />,
-    errorElement: <ErrorFallback />,
+    element: <Login />
   },
   {
     path: '/signup',
-    element: <Signup />,
-    errorElement: <ErrorFallback />,
+    element: <Signup />
   },
   {
-    path: '/jobs',
-    element: <Jobs />,
-    errorElement: <ErrorFallback />,
+    path: "/jobs",
+    element: <Jobs />
   },
   {
-    path: '/companies',
-    element: <Companies />,
-    errorElement: <ErrorFallback />,
+    path: "/description/:id",
+    element: <JobDescription />
   },
   {
-    path: '/profile',
-    element: <Profile />,
-    errorElement: <ErrorFallback />,
+    path: "/browse",
+    element: <Browse />
   },
   {
-    path: '*',
-    element: <NotFound />,
-  }
+    path: "/profile",
+    element: <Profile />
+  },
+  // For Admin or Recruiter
+  {
+    path:"/admin/companies",
+    element: <ProtectedRoute><Companies/></ProtectedRoute>
+  },
+  {
+    path:"/admin/companies/create",
+    element: <ProtectedRoute><CompanyCreate/></ProtectedRoute> 
+  },
+  {
+    path:"/admin/companies/:id",
+    element:<ProtectedRoute><CompanySetup/></ProtectedRoute> 
+  },
+  {
+    path:"/admin/jobs",
+    element:<ProtectedRoute><AdminJobs/></ProtectedRoute> 
+  },
+  {
+    path:"/admin/jobs/create",
+    element:<ProtectedRoute><PostJob/></ProtectedRoute> 
+  },
+  {
+    path:"/admin/jobs/:id/applicants",
+    element:<ProtectedRoute><Applicants/></ProtectedRoute> 
+  },
+
 ])
 //Authentication check
 const AppWithAuth = () => {

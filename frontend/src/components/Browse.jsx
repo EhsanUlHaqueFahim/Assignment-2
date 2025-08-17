@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from './shared/Navbar'
-import FilterCard from './FilterCard'
 import Job from './Job';
-import { useSelector } from 'react-redux';
-import { motion } from 'framer-motion';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSearchedQuery } from '@/redux/jobSlice';
+import useGetAllJobs from '@/hooks/useGetAllJobs';
 
 
 
-const Jobs = () => {
-    const { allJobs, searchedQuery } = useSelector(store => store.job);
+const Browse = () => {
+    useGetAllJobs();
+    const {allJobs, searchedQuery} = useSelector(store=>store.job);
+    const dispatch = useDispatch();
     const [filterJobs, setFilterJobs] = useState(allJobs);
 
     useEffect(() => {
@@ -41,40 +43,30 @@ const Jobs = () => {
         }
     }, [allJobs, searchedQuery]);
 
+    useEffect(()=>{
+        return ()=>{
+            dispatch(setSearchedQuery(""));
+        }
+    },[])
+    
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <Navbar />
-            <div className='max-w-7xl mx-auto mt-5 px-4'>
-                <div className='flex gap-5'>
-                    <div className='w-20%'>
-                        <FilterCard />
-                    </div>
+            <div className='max-w-7xl mx-auto my-10 px-4'>
+                <h1 className='font-bold text-xl my-10 text-gray-900 dark:text-white'>Search Results ({filterJobs.length})</h1>
+                <div className='grid grid-cols-3 gap-4'>
                     {
-                        filterJobs.length <= 0 ? <span className="text-gray-600 dark:text-gray-400">Job not found</span> : (
-                            <div className='flex-1 h-[88vh] overflow-y-auto pb-5'>
-                                <div className='grid grid-cols-3 gap-4'>
-                                    {
-                                        filterJobs.map((job) => (
-                                            <motion.div
-                                                initial={{ opacity: 0, x: 100 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, x: -100 }}
-                                                transition={{ duration: 0.3 }}
-                                                key={job?._id}>
-                                                <Job job={job} />
-                                            </motion.div>
-                                        ))
-                                    }
-                                </div>
-                            </div>
-                        )
+                        filterJobs.map((job) => {
+                            return (
+                                <Job key={job._id} job={job}/>
+                            )
+                        })
                     }
                 </div>
+
             </div>
-
-
         </div>
     )
 }
 
-export default Jobs
+export default Browse

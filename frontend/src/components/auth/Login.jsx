@@ -55,64 +55,63 @@ const Login = () => {
         }
     },[])
     return (
-        <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
             <Navbar />
             <div className='flex items-center justify-center max-w-7xl mx-auto px-4'>
                 <form onSubmit={submitHandler} className='w-full max-w-md bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 rounded-xl p-8 my-10'>
                     <h1 className='font-bold text-3xl mb-6 text-center text-gray-800 dark:text-white'>Welcome Back</h1>
                     <div className='my-2'>
-                        <Label className="dark:text-gray-200">Email</Label>
+                        <Label>Email</Label>
                         <Input
                             type="email"
                             value={input.email}
                             name="email"
                             onChange={changeEventHandler}
                             placeholder=""
-                            className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                         />
                     </div>
+
                     <div className='my-2'>
-                        <Label className="dark:text-gray-200">Password</Label>
+                        <Label>Password</Label>
                         <Input
                             type="password"
                             value={input.password}
                             name="password"
                             onChange={changeEventHandler}
                             placeholder=""
-                            className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                         />
                     </div>
-                    <div className='flex items-center justify-center'>
-                        <RadioGroup className="flex items-center gap-6 my-6">
-                            <div className="flex items-center space-x-2">
-                                <Input
-                                    type="radio"
-                                    name="role"
-                                    value="student"
-                                    checked={input.role === 'student'}
-                                    onChange={changeEventHandler}
-                                    className="cursor-pointer"
-                                />
-                                <Label htmlFor="r1" className="text-sm font-medium dark:text-gray-200">Student</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Input
-                                    type="radio"
-                                    name="role"
-                                    value="recruiter"
-                                    checked={input.role === 'recruiter'}
-                                    onChange={changeEventHandler}
-                                    className="cursor-pointer"
-                                />
-                                <Label htmlFor="r2" className="text-sm font-medium dark:text-gray-200">Recruiter</Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
+                                         <div className='flex items-center justify-center'>
+                         <RadioGroup className="flex items-center gap-6 my-6">
+                             <div className="flex items-center space-x-2">
+                                 <Input
+                                     type="radio"
+                                     name="role"
+                                     value="student"
+                                     checked={input.role === 'student'}
+                                     onChange={changeEventHandler}
+                                     className="cursor-pointer w-4 h-4"
+                                 />
+                                 <Label htmlFor="r1" className="text-sm font-medium whitespace-nowrap">Job Seeker</Label>
+                             </div>
+                             <div className="flex items-center space-x-2">
+                                 <Input
+                                     type="radio"
+                                     name="role"
+                                     value="recruiter"
+                                     checked={input.role === 'recruiter'}
+                                     onChange={changeEventHandler}
+                                     className="cursor-pointer w-4 h-4"
+                                 />
+                                 <Label htmlFor="r2" className="text-sm font-medium">Recruiter</Label>
+                             </div>
+                         </RadioGroup>
+                     </div>
                     {
                         loading ? <Button className="w-full my-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3">Login</Button>
                     }
                     <div className='text-center mt-6'>
-                        <span className='text-sm text-gray-600 dark:text-gray-300'>Don't have an account? <Link to="/signup" className='text-blue-600 dark:text-blue-400 font-medium hover:underline'>Signup</Link></span>
+                        <span className='text-sm text-gray-600 dark:text-gray-400'>Don't have an account? <Link to="/signup" className='text-blue-600 font-medium hover:underline'>Signup</Link></span>
                     </div>
                 </form>
             </div>
