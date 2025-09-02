@@ -11,12 +11,11 @@ import { useSelector } from 'react-redux'
 import useGetAppliedJobs from '@/hooks/useGetAppliedJobs'
 
 
-const isResume = true;
-
 const Profile = () => {
     useGetAppliedJobs();
     const [open, setOpen] = useState(false);
     const {user} = useSelector(store=>store.auth);
+    const hasResume = user?.profile?.resume && user?.profile?.resumeOriginalName;
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -60,7 +59,7 @@ const Profile = () => {
                 <div className='grid w-full max-w-sm items-center gap-1.5'>
                     <Label className="text-md font-bold text-gray-900 dark:text-white">Resume</Label>
                     {
-                        isResume ? <a target='blank' href={user?.profile?.resume} className='text-blue-500 w-full hover:underline cursor-pointer'>{user?.profile?.resumeOriginalName}</a> : <span className="text-gray-500 dark:text-gray-400">NA</span>
+                        hasResume ? <a target='blank' href={user?.profile?.resume} className='text-blue-500 w-full hover:underline cursor-pointer'>{user?.profile?.resumeOriginalName}</a> : <span className="text-gray-500 dark:text-gray-400">No resume uploaded</span>
                     }
                 </div>
             </div>

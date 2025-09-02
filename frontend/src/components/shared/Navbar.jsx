@@ -9,6 +9,7 @@ import axios from 'axios'
 import { USER_API_END_POINT } from '@/utils/constant'
 import { setUser } from '@/redux/authSlice'
 import { toast } from 'sonner'
+import NotificationBell from '../NotificationBell'
 
 const Navbar = () => {
     const { user, loading } = useSelector(store => store.auth);
@@ -72,6 +73,7 @@ const Navbar = () => {
                         ) : (
                             <div className='flex items-center gap-3'>
                                 <span className='text-sm text-gray-600 dark:text-gray-400'>Welcome, {user?.fullname}</span>
+                                {user?.role === 'student' && <NotificationBell />}
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Avatar className="cursor-pointer border-2 border-gray-200 hover:border-[#6A38C2] transition-colors">

@@ -42,6 +42,7 @@ const CompanySetup = () => {
         formData.append("website", input.website);
         formData.append("location", input.location);
         if (input.file) {
+            console.log('Adding company logo file:', input.file.name);
             formData.append("file", input.file);
         }
         try {

@@ -73,12 +73,18 @@ export const getCompanyById = async (req, res) => {
 export const updateCompany = async (req, res) => {
     try {
         const { name, description, website, location } = req.body;
- 
         const file = req.file;
-        // 
+        console.log("Company update - Files received:", req.file);
+        console.log("Company update - Body received:", req.body);
         
-    
         const updateData = { name, description, website, location };
+
+        // Add logo if file is uploaded
+        if (file) {
+            const logoUrl = `http://localhost:8000/uploads/${file.filename}`;
+            console.log('Company logo URL:', logoUrl);
+            updateData.logo = logoUrl;
+        }
 
         const company = await Company.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
@@ -90,10 +96,15 @@ export const updateCompany = async (req, res) => {
         }
         return res.status(200).json({
             message:"Company information updated.",
+            company,
             success:true
         })
 
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Internal server error.",
+            success: false
+        })
     }
 }

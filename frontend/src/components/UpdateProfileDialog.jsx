@@ -19,8 +19,9 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         email: user?.email || "",
         phoneNumber: user?.phoneNumber || "",
         bio: user?.profile?.bio || "",
-        skills: user?.profile?.skills?.map(skill => skill) || "",
-        file: user?.profile?.resume || ""
+        skills: user?.profile?.skills?.join(", ") || "",
+        resumeFile: null,
+        profilePhotoFile: null
     });
     const dispatch = useDispatch();
 
@@ -28,9 +29,15 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         setInput({ ...input, [e.target.name]: e.target.value });
     }
 
-    const fileChangeHandler = (e) => {
+    const resumeFileChangeHandler = (e) => {
         const file = e.target.files?.[0];
-        setInput({ ...input, file })
+        console.log('Resume file selected:', file);
+        setInput({ ...input, resumeFile: file })
+    }
+
+    const profilePhotoFileChangeHandler = (e) => {
+        const file = e.target.files?.[0];
+        setInput({ ...input, profilePhotoFile: file })
     }
 
     const submitHandler = async (e) => {
@@ -41,8 +48,14 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         formData.append("phoneNumber", input.phoneNumber);
         formData.append("bio", input.bio);
         formData.append("skills", input.skills);
-        if (input.file) {
-            formData.append("file", input.file);
+        if (input.resumeFile) {
+            console.log('Adding resume file:', input.resumeFile.name);
+            console.log('Resume file object:', input.resumeFile);
+            formData.append("resumeFile", input.resumeFile);
+        }
+        if (input.profilePhotoFile) {
+            console.log('Adding profile photo file:', input.profilePhotoFile.name);
+            formData.append("profilePhotoFile", input.profilePhotoFile);
         }
         try {
             setLoading(true);
@@ -78,10 +91,10 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                     <form onSubmit={submitHandler}>
                         <div className='grid gap-4 py-4'>
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="name" className="text-right">Name</Label>
+                                <Label htmlFor="fullname" className="text-right">Name</Label>
                                 <Input
-                                    id="name"
-                                    name="name"
+                                    id="fullname"
+                                    name="fullname"
                                     type="text"
                                     value={input.fullname}
                                     onChange={changeEventHandler}
@@ -100,10 +113,10 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 />
                             </div>
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="number" className="text-right">Number</Label>
+                                <Label htmlFor="phoneNumber" className="text-right">Number</Label>
                                 <Input
-                                    id="number"
-                                    name="number"
+                                    id="phoneNumber"
+                                    name="phoneNumber"
                                     value={input.phoneNumber}
                                     onChange={changeEventHandler}
                                     className="col-span-3"
@@ -130,13 +143,24 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 />
                             </div>
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="file" className="text-right">Resume</Label>
+                                <Label htmlFor="profilePhoto" className="text-right">Profile Photo</Label>
                                 <Input
-                                    id="file"
-                                    name="file"
+                                    id="profilePhoto"
+                                    name="profilePhoto"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={profilePhotoFileChangeHandler}
+                                    className="col-span-3"
+                                />
+                            </div>
+                            <div className='grid grid-cols-4 items-center gap-4'>
+                                <Label htmlFor="resume" className="text-right">Resume</Label>
+                                <Input
+                                    id="resume"
+                                    name="resume"
                                     type="file"
                                     accept="application/pdf"
-                                    onChange={fileChangeHandler}
+                                    onChange={resumeFileChangeHandler}
                                     className="col-span-3"
                                 />
                             </div>

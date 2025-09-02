@@ -27,6 +27,11 @@ const Job = ({job}) => {
                 <Button className="p-6" variant="outline" size="icon">
                     <Avatar>
                         <AvatarImage src={job?.company?.logo} />
+                        {!job?.company?.logo && (
+                            <div className="w-full h-full bg-[#6A38C2] flex items-center justify-center text-white font-semibold text-lg">
+                                {job?.company?.name?.charAt(0)?.toUpperCase() || 'C'}
+                            </div>
+                        )}
                     </Avatar>
                 </Button>
                 <div>

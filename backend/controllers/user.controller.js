@@ -41,7 +41,7 @@ export const register = async (req, res) => {
         skills: [],
         resume: "",
         resumeOriginalName: "",
-        profilePhoto: `http://localhost:3000/uploads/${file.filename}`,
+        profilePhoto: `http://localhost:8000/uploads/${file.filename}`,
         profilePhotoOriginalName: file.originalname
       };
     }
@@ -165,7 +165,11 @@ export const getCurrentUser = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
-    const file = req.file;
+    console.log("Files received:", req.files);
+    console.log("Body received:", req.body);
+    
+    const profilePhotoFile = req.files?.profilePhotoFile?.[0];
+    const resumeFile = req.files?.resumeFile?.[0];
 
 
 
@@ -198,10 +202,25 @@ export const updateProfile = async (req, res) => {
     if (skills) user.profile.skills = skillsArray
     
     // Update profile photo if file is uploaded
-    if (file) {
+    if (profilePhotoFile) {
       if (!user.profile) user.profile = {};
-      user.profile.profilePhoto = `http://localhost:3000/uploads/${file.filename}`;
-      user.profile.profilePhotoOriginalName = file.originalname;
+      const profilePhotoUrl = `http://localhost:8000/uploads/${profilePhotoFile.filename}`;
+      console.log('Profile photo URL:', profilePhotoUrl);
+      user.profile.profilePhoto = profilePhotoUrl;
+      user.profile.profilePhotoOriginalName = profilePhotoFile.originalname;
+    }
+
+    // Update resume if file is uploaded
+    if (resumeFile) {
+      if (!user.profile) user.profile = {};
+      const resumeUrl = `http://localhost:8000/uploads/${resumeFile.filename}`;
+      console.log('Resume file received:', resumeFile);
+      console.log('Resume URL:', resumeUrl);
+      console.log('Resume original name:', resumeFile.originalname);
+      user.profile.resume = resumeUrl;
+      user.profile.resumeOriginalName = resumeFile.originalname;
+    } else {
+      console.log('No resume file received');
     }
 
 

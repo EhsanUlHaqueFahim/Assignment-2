@@ -4,41 +4,18 @@ import FilterCard from './FilterCard'
 import Job from './Job';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import useGetAllJobs from '@/hooks/useGetAllJobs';
 
 
 
 const Jobs = () => {
+    useGetAllJobs();
     const { allJobs, searchedQuery } = useSelector(store => store.job);
     const [filterJobs, setFilterJobs] = useState(allJobs);
 
     useEffect(() => {
-        if (searchedQuery) {
-            const filteredJobs = allJobs.filter((job) => {
-                
-                if (searchedQuery.includes('-') && searchedQuery.includes('000')) {
-                    const [minSalary, maxSalary] = searchedQuery.split('-').map(s => parseInt(s));
-                    return job.salary >= minSalary && job.salary <= maxSalary;
-                }
-                
-                
-                if (["Dhaka", "Barishal", "Khulna", "Chittagong", "Sylhet"].includes(searchedQuery)) {
-                    return job.location.toLowerCase().includes(searchedQuery.toLowerCase());
-                }
-                
-                
-                if (["Frontend Developer", "Backend Developer", "FullStack Developer"].includes(searchedQuery)) {
-                    return job.title.toLowerCase().includes(searchedQuery.toLowerCase());
-                }
-                
-                
-                return job.title.toLowerCase().includes(searchedQuery.toLowerCase()) ||
-                    job.description.toLowerCase().includes(searchedQuery.toLowerCase()) ||
-                    job.location.toLowerCase().includes(searchedQuery.toLowerCase())
-            })
-            setFilterJobs(filteredJobs)
-        } else {
-            setFilterJobs(allJobs)
-        }
+        // Since backend now handles search properly, just use the jobs returned from backend
+        setFilterJobs(allJobs);
     }, [allJobs, searchedQuery]);
 
     return (

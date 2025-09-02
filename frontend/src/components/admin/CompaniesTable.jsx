@@ -39,6 +39,11 @@ const CompaniesTable = () => {
                                 <TableCell>
                                     <Avatar>
                                         <AvatarImage src={company.logo}/>
+                                        {!company.logo && (
+                                            <div className="w-full h-full bg-[#6A38C2] flex items-center justify-center text-white font-semibold text-sm">
+                                                {company.name?.charAt(0)?.toUpperCase() || 'C'}
+                                            </div>
+                                        )}
                                     </Avatar>
                                 </TableCell>
                                 <TableCell className="text-gray-700 dark:text-gray-300">{company.name}</TableCell>

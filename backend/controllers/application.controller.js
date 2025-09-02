@@ -1,6 +1,8 @@
 
 import { Application } from "../models/application.model.js";
 import { Job } from "../models/job.model.js";
+import { Notification } from "../models/notification.model.js";
+import { Company } from "../models/company.model.js";
 
 export const applyJob = async (req, res) => {
     try {
@@ -107,8 +109,11 @@ export const updateStatus = async (req,res) => {
             })
         };
 
-        // find the application by applicantion id
-        const application = await Application.findOne({_id:applicationId});
+        // find the application by application id with populated job and company
+        const application = await Application.findById(applicationId)
+            .populate('job')
+            .populate('applicant');
+            
         if(!application){
             return res.status(404).json({
                 message:"Application not found.",
@@ -116,9 +121,48 @@ export const updateStatus = async (req,res) => {
             })
         };
 
+        // Get company information
+        const job = await Job.findById(application.job._id).populate('company');
+        if(!job){
+            return res.status(404).json({
+                message:"Job not found.",
+                success:false
+            })
+        }
+
         // update the status
         application.status = status.toLowerCase();
         await application.save();
+
+        // Create notification for the applicant
+        let notificationTitle, notificationMessage;
+        
+        if(status.toLowerCase() === 'accepted') {
+            notificationTitle = "Application Accepted! 🎉";
+            notificationMessage = `Congratulations! Your application for "${job.title}" at ${job.company.name} has been accepted. Please visit us at our company for the next steps.`;
+        } else if(status.toLowerCase() === 'rejected') {
+            notificationTitle = "Application Update";
+            notificationMessage = `We regret to inform you that your application for "${job.title}" at ${job.company.name} has not been selected for this position.`;
+        }
+
+        // Create notification
+        await Notification.create({
+            user: application.applicant._id,
+            type: status.toLowerCase() === 'accepted' ? 'application_accepted' : 'application_rejected',
+            title: notificationTitle,
+            message: notificationMessage,
+            job: job._id,
+            company: job.company._id,
+            application: application._id
+        });
+
+        // Remove application from job's applications array if accepted or rejected
+        if(status.toLowerCase() === 'accepted' || status.toLowerCase() === 'rejected') {
+            await Job.findByIdAndUpdate(
+                job._id,
+                { $pull: { applications: applicationId } }
+            );
+        }
 
         return res.status(200).json({
             message:"Status updated successfully.",
@@ -126,7 +170,11 @@ export const updateStatus = async (req,res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        console.log('Error updating application status:', error);
+        return res.status(500).json({
+            message:"Internal server error",
+            success:false
+        });
     }
 }
 

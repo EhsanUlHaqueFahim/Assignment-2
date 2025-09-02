@@ -9,6 +9,7 @@ import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
+import notificationRoute from "./routes/notification.route.js";
 
 const app = express();
 dotenv.config({});
@@ -23,10 +24,29 @@ const corsOptions = {
 }
 app.use(cors(corsOptions));
 
+// Test endpoint to verify server is working
+app.get('/test', (req, res) => {
+    res.json({ message: 'Server is working!' });
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const uploadsPath = path.join(__dirname, 'uploads');
+console.log('Uploads directory path:', uploadsPath);
+app.use('/uploads', express.static(uploadsPath));
+
+// Test endpoint to check if files are accessible
+app.get('/test-file/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, 'uploads', filename);
+    console.log('Testing file access:', filePath);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.log('File not found:', err.message);
+            res.status(404).send('File not found');
+        }
+    });
+});
 
 const PORT = process.env.PORT || 3000;
 
@@ -35,6 +55,7 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
+app.use("/api/v1/notification", notificationRoute);
 
 app.listen(PORT,()=>{
     connectDB();

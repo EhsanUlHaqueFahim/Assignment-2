@@ -26,3 +26,17 @@ const storage = multer.diskStorage({
 });
 
 export const singleUpload = multer({storage}).single("file");
+
+export const multipleUpload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        console.log('Processing file:', file.fieldname, file.originalname);
+        cb(null, true);
+    },
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit
+    }
+}).fields([
+    { name: 'profilePhotoFile', maxCount: 1 },
+    { name: 'resumeFile', maxCount: 1 }
+]);
