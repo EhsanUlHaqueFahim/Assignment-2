@@ -1,120 +1,105 @@
-import { Job } from "../models/job.model.js";
-
-
-
-
-export const postJob = async (req, res) => {
-    try {
-        const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
-        const userId = req.id;
-
-        if (!title || !description || !requirements || !salary || !location || !jobType || !experience || !position || !companyId) {
-            return res.status(400).json({
-                message: "Something is missing.",
-                success: false
-            })
-        };
-        const job = await Job.create({
-            title,
-            description,
-            requirements: requirements.split(","),
-            salary: Number(salary),
-            location,
-            jobType,
-            experienceLevel: experience,
-            position,
-            company: companyId,
-            created_by: userId
-        });
-        return res.status(201).json({
-            message: "New job created successfully.",
-            job,
-            success: true
-        });
-    } catch (error) {
-        console.log(error);
-    }
-}
-// For student
 export const getAllJobs = async (req, res) => {
     try {
         const keyword = req.query.keyword || "";
-        console.log('Backend received keyword:', keyword);
+        const locationFilter = req.query.location || "";
+        console.log('Backend received keyword:', keyword, 'location:', locationFilter);
         
-        // If no keyword provided, return all jobs
-        if (!keyword.trim()) {
-            console.log('No keyword provided, returning all jobs');
-            const jobs = await Job.find({}).populate({
-                path: "company"
-            }).sort({ createdAt: -1 });
-            console.log('Found', jobs.length, 'jobs');
-            return res.status(200).json({
-                jobs,
-                success: true
-            });
-        }
+        // Build search query
+        let query = {};
         
-        // If keyword provided, search for matching jobs
-        console.log('Searching for keyword:', keyword);
-        const query = {
-            $or: [
+        if (keyword.trim()) {
+            query.$or = [
                 { title: { $regex: keyword, $options: "i" } },
                 { description: { $regex: keyword, $options: "i" } },
-                { location: { $regex: keyword, $options: "i" } }
-            ]
-        };
+                { requirements: { $regex: keyword, $options: "i" } }
+            ];
+        }
+        
+        if (locationFilter.trim()) {
+            query.location = { $regex: locationFilter, $options: "i" };
+        }
+
         const jobs = await Job.find(query).populate({
             path: "company"
         }).sort({ createdAt: -1 });
-        console.log('Found', jobs.length, 'matching jobs for keyword:', keyword);
+
+        console.log('Found', jobs.length, 'jobs');
+
+       
+        const processedJobs = [];
         
+        
+        for (let i = 0; i < jobs.length; i++) {
+            const job = jobs[i].toObject();
+            let relevanceScore = 0;
+            const matchedKeywords = [];
+            
+            
+            if (keyword.trim()) {
+                
+                const searchTerms = keyword.toLowerCase().split(" ");
+                
+                for (let j = 0; j < searchTerms.length; j++) {
+                    const term = searchTerms[j].trim();
+                    if (!term) continue;
+                    
+                    // Check title
+                    if (job.title.toLowerCase().includes(term)) {
+                        relevanceScore += 3;
+                        matchedKeywords.push(term);
+                    }
+                    
+                    // Check description
+                    if (job.description.toLowerCase().includes(term)) {
+                        relevanceScore += 2;
+                        if (!matchedKeywords.includes(term)) {
+                            matchedKeywords.push(term);
+                        }
+                    }
+                    
+                    
+                    if (job.requirements && Array.isArray(job.requirements)) {
+                        for (let k = 0; k < job.requirements.length; k++) {
+                            if (job.requirements[k].toLowerCase().includes(term)) {
+                                relevanceScore += 1;
+                                if (!matchedKeywords.includes(term)) {
+                                    matchedKeywords.push(term);
+                                }
+                                break; 
+                            }
+                        }
+                    }
+                    
+                   
+                    if (job.location.toLowerCase().includes(term)) {
+                        relevanceScore += 2;
+                        if (!matchedKeywords.includes(term)) {
+                            matchedKeywords.push(term);
+                        }
+                    }
+                }
+            }
+            
+            
+            job.relevanceScore = relevanceScore;
+            job.matchedKeywords = matchedKeywords;
+            processedJobs.push(job);
+        }
+        
+        if (keyword.trim()) {
+            processedJobs.sort((a, b) => b.relevanceScore - a.relevanceScore);
+        }
+
         return res.status(200).json({
-            jobs,
+            jobs: processedJobs,
             success: true
-        })
+        });
+        
     } catch (error) {
         console.log('Error in getAllJobs:', error);
         return res.status(500).json({
             message: "Internal server error",
             success: false
         });
-    }
-}
-// student
-export const getJobById = async (req, res) => {
-    try {
-        const jobId = req.params.id;
-        const job = await Job.findById(jobId)
-        if (!job) {
-            return res.status(404).json({
-                message: "Jobs not found.",
-                success: false
-            })
-        };
-        return res.status(200).json({ job, success: true });
-    } catch (error) {
-        console.log(error);
-    }
-}
-// created job amount
-export const getAdminJobs = async (req, res) => {
-    try {
-        const adminId = req.id;
-        const jobs = await Job.find({ created_by: adminId }).populate({
-            path:'company',
-            createdAt:-1
-        });
-        if (!jobs) {
-            return res.status(404).json({
-                message: "Jobs not found.",
-                success: false
-            })
-        };
-        return res.status(200).json({
-            jobs,
-            success: true
-        })
-    } catch (error) {
-        console.log(error);
     }
 }
