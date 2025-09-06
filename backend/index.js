@@ -48,8 +48,6 @@ app.get('/test-file/:filename', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
-
 //API
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
@@ -57,9 +55,28 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/notification", notificationRoute);
 
-app.listen(PORT,()=>{
-    connectDB();
-    console.log(`Server running at port ${PORT}`);
-})
+const PORT = process.env.PORT || 3000;
+
+// Connect to database and start server
+const startServer = async () => {
+    try {
+        
+        console.log('🔄 Connecting to database...');
+        await connectDB(); // This uses the Singleton pattern
+        
+        console.log('✅ Database connected successfully');
+        
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running at port ${PORT}`);
+            console.log(`🌐 Server URL: http://localhost:${PORT}`);
+        });
+        
+    } catch (error) {
+        console.error('❌ Failed to start server:', error.message);
+        console.log('💀 Server shutting down...');
+        process.exit(1); 
+    }
+};
 
 
+startServer();
